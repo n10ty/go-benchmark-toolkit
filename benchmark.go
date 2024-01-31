@@ -108,5 +108,6 @@ func (g *Benchmark) PrintSummary() {
 	fmt.Println("Total time:", g.result.total)
 	fmt.Println("Success:", g.result.success)
 	fmt.Println("Failed:", g.result.failed)
+	fmt.Println("RPS:", float64(g.result.iterations)/g.result.total.Seconds())
 	fmt.Println("Iterations:", g.result.iterations)
 }
