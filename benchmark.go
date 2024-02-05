@@ -3,11 +3,12 @@ package benchmark
 import (
 	"context"
 	"fmt"
-	"github.com/schollz/progressbar/v3"
 	"math"
 	"sort"
 	"sync"
 	"time"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 type Result struct {
@@ -49,9 +50,9 @@ func (g *Benchmark) launch(executable func() error, bar *progressbar.ProgressBar
 		case <-stop:
 			return
 		default:
+			err := executable()
 			g.m.Lock()
 			start := time.Now()
-			err := executable()
 			if err != nil {
 				g.result.failed++
 			} else {
