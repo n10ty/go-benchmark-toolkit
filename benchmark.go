@@ -24,6 +24,7 @@ type Result struct {
 	p80        time.Duration
 	p95        time.Duration
 	p99        time.Duration
+	lastError  error
 }
 
 type Benchmark struct {
@@ -47,7 +48,7 @@ func NewBenchmark(duration time.Duration, threads int, executable func() error) 
 	return b
 }
 
-func (g *Benchmark) launch(executable func() error, i int, bar *progressbar.ProgressBar, stop <-chan struct{}) {
+func (g *Benchmark) launch(executable func() error, bar *progressbar.ProgressBar, stop <-chan struct{}) {
 	for {
 		select {
 		case <-stop:
@@ -57,6 +58,7 @@ func (g *Benchmark) launch(executable func() error, i int, bar *progressbar.Prog
 			err := executable()
 			if err != nil {
 				g.result.failed.Add(1)
+				g.result.lastError = err
 			} else {
 				g.result.success.Add(1)
 			}
@@ -79,7 +81,7 @@ func (g *Benchmark) Run() {
 
 	start := time.Now()
 	for i := 0; i < g.threads; i++ {
-		go g.launch(g.executable, i, bar, ctx.Done())
+		go g.launch(g.executable, bar, ctx.Done())
 	}
 
 	<-ctx.Done()
@@ -119,4 +121,7 @@ func (g *Benchmark) PrintSummary() {
 	fmt.Println("Failed:", g.result.failed.Load())
 	fmt.Println("RPS:", float64(g.result.iterations.Load())/g.result.total.Seconds())
 	fmt.Println("Iterations:", g.result.iterations.Load())
+	if g.result.lastError != nil {
+		fmt.Println("Last error:", g.result.lastError)
+	}
 }
