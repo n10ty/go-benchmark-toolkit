@@ -13,8 +13,6 @@ import (
 
 type Result struct {
 	sum        atomic.Int64
-	mins       map[int]time.Duration
-	maxs       map[int]time.Duration
 	min        time.Duration
 	max        time.Duration
 	times      []time.Duration
@@ -42,15 +40,9 @@ func NewBenchmark(duration time.Duration, threads int, executable func() error) 
 		duration:   duration,
 		result: Result{
 			times: make([]time.Duration, 0),
-			mins:  make(map[int]time.Duration),
-			maxs:  make(map[int]time.Duration),
-			min:   time.Duration(math.MaxInt64),
-			max:   time.Duration(math.MinInt64),
+			min:   math.MinInt64,
+			max:   math.MaxInt64,
 		},
-	}
-	for i := 0; i < threads; i++ {
-		b.result.mins[i] = time.Duration(math.MaxInt64)
-		b.result.maxs[i] = time.Duration(math.MinInt64)
 	}
 	return b
 }
@@ -73,13 +65,6 @@ func (g *Benchmark) launch(executable func() error, i int, bar *progressbar.Prog
 			g.result.sum.Add(int64(elapsed))
 			g.result.times = append(g.result.times, elapsed)
 
-			if elapsed < g.result.mins[i] {
-				g.result.mins[i] = elapsed
-			}
-
-			if elapsed > g.result.maxs[i] {
-				g.result.maxs[i] = elapsed
-			}
 			g.result.iterations.Add(1)
 			bar.Add(1)
 		}
@@ -117,15 +102,8 @@ func (g *Benchmark) Run() {
 	g.result.p95 = g.result.times[int(p95)]
 	p99 := float64(len(g.result.times)) * 0.99
 	g.result.p99 = g.result.times[int(p99)]
-
-	for i := 0; i < g.threads; i++ {
-		if g.result.mins[i] < g.result.min {
-			g.result.min = g.result.mins[i]
-		}
-		if g.result.maxs[i] > g.result.max {
-			g.result.max = g.result.maxs[i]
-		}
-	}
+	g.result.min = g.result.times[0]
+	g.result.max = g.result.times[len(g.result.times)-1]
 }
 
 func (g *Benchmark) PrintSummary() {
