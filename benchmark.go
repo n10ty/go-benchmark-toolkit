@@ -80,7 +80,6 @@ func (g *Benchmark) launch(executable func() error, i int, bar *progressbar.Prog
 			if elapsed > g.result.maxs[i] {
 				g.result.maxs[i] = elapsed
 			}
-			g.result.total += elapsed
 			g.result.iterations.Add(1)
 			bar.Add(1)
 		}
@@ -93,11 +92,13 @@ func (g *Benchmark) Run() {
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(g.duration))
 	defer cancel()
 
+	start := time.Now()
 	for i := 0; i < g.threads; i++ {
 		go g.launch(g.executable, i, bar, ctx.Done())
 	}
 
 	<-ctx.Done()
+	g.result.total = time.Since(start)
 	for t := 0; t < g.threads; t++ {
 		sort.Slice(g.result.times, func(i, j int) bool {
 			return g.result.times[i] < g.result.times[j]

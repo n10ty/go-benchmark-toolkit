@@ -18,13 +18,13 @@ func main() {
 	
 	//Output:
 	//Avg time: 173.865291ms
-    //Min time: 115.557292ms
-    //Max time: 405.42125ms
-    //Median time: 115.557292ms
-    //Total time: 9.910321625s
-    //Success: 57
-    //Failed: 0
-    //RPS: 5.751579227884039
-    //Iterations: 57
+        //Min time: 115.557292ms
+        //Max time: 405.42125ms
+        //Median time: 115.557292ms
+        //Total time: 9.910321625s
+        //Success: 57
+        //Failed: 0
+        //RPS: 5.751579227884039
+        //Iterations: 57
 }
 ```
